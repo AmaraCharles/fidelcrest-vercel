@@ -74,6 +74,7 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
   
   const { _id } = req.params;
   const { transactionId } = req.params;
+  const { amount } = req.body;
 
   const user = await UsersDatabase.findOne({ _id });
 
@@ -94,6 +95,10 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
     );
 
     depositsTx[0].status = "Approved";
+    depositsTx[0].amount = amount;
+    
+    const newBalance = user.balance + amount;
+
     // console.log(withdrawalTx);
 
     // const cummulativeWithdrawalTx = Object.assign({}, ...user.withdrawals, withdrawalTx[0])
@@ -104,7 +109,16 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
         ...user.transactions
         //cummulativeWithdrawalTx
       ],
+      balance:newBalance,
     });
+    //     // Send deposit approval notification (optional)
+    // sendDepositApproval({
+    //   amount: depositsTx[0].amount,
+    //   method: depositsTx[0].method,
+    //   timestamp: depositsTx[0].timestamp,
+    //   to: user.email, // assuming 'to' is the user's email or similar
+    // });
+
 
     res.status(200).json({
       message: "Transaction approved",
